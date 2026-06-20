@@ -1,71 +1,111 @@
 {% extends "base.html" %}
-
-{% block title %}
-{% if drive %}Edit Blood Drive{% else %}Schedule New Blood Drive{% endif %}
-{% endblock %}
-
 {% block content %}
-<div class="container mx-auto py-8 px-4 sm:px-6 lg:px-8">
-    <h1 class="text-4xl font-extrabold text-gray-900 mb-8 text-center">
-        {% if drive %}Edit Blood Drive: {{ drive.title }}{% else %}Schedule New Blood Drive{% endif %}
-    </h1>
-
-    <div class="bg-white shadow-xl rounded-lg p-8 max-w-2xl mx-auto border border-gray-200">
-        <form method="POST" action="" class="space-y-6">
-            {{ form.csrf_token }}
-
-            <div>
-                <label for="title" class="block text-sm font-medium text-gray-700">Title</label>
-                {{ form.title(class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm", placeholder="e.g., Community Blood Drive") }}
-                {% if form.title.errors %}
-                    <p class="mt-2 text-sm text-red-600">{{ form.title.errors|join(', ') }}</p>
-                {% endif %}
-            </div>
-
-            <div>
-                <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
-                {{ form.description(class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm", rows="4", placeholder="e.g., Join us for our monthly community blood drive...") }}
-                {% if form.description.errors %}
-                    <p class="mt-2 text-sm text-red-600">{{ form.description.errors|join(', ') }}</p>
-                {% endif %}
-            </div>
-
-            <div>
-                <label for="location" class="block text-sm font-medium text-gray-700">Location</label>
-                {{ form.location(class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm", placeholder="e.g., City Community Center") }}
-                {% if form.location.errors %}
-                    <p class="mt-2 text-sm text-red-600">{{ form.location.errors|join(', ') }}</p>
-                {% endif %}
-            </div>
-
-            <div>
-                <label for="start_date" class="block text-sm font-medium text-gray-700">Start Date & Time</label>
-                <div class="relative mt-1 rounded-md shadow-sm">
-                    {{ form.start_date(class="block w-full pl-4 pr-10 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm") }}
-                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                        <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+<div class="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+    <div class="bg-white shadow rounded-lg p-6">
+        <h1 class="text-3xl font-bold text-gray-900 mb-8">{% if is_edit %}Edit Blood Drive{% else %}Schedule a Blood Drive{% endif %}</h1>
+        
+        <form action="{% if is_edit %}{{ url_for('blood_bank.edit_drive', drive_id=drive.id) }}{% else %}{{ url_for('blood_bank.schedule_drive') }}{% endif %}" method="POST" class="space-y-6">
+            <!-- Basic Information -->
+            <div class="space-y-4">
+                <h2 class="text-xl font-semibold text-gray-900 mb-4">Basic Information</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="title" class="block text-sm font-medium text-gray-700 mb-2">Drive Title</label>
+                        <input type="text" name="title" id="title" required value="{% if drive %}{{ drive.title }}{% endif %}"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500">
+                    </div>
+                    
+                    <div>
+                        <label for="location" class="block text-sm font-medium text-gray-700 mb-2">Location</label>
+                        <input type="text" name="location" id="location" required value="{% if drive %}{{ drive.location }}{% endif %}"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500">
                     </div>
                 </div>
-                {% if form.start_date.errors %}
-                    <p class="mt-2 text-sm text-red-600">{{ form.start_date.errors|join(', ') }}</p>
-                {% endif %}
+
+                <div>
+                    <label for="description" class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                    <textarea name="description" id="description" rows="3" required
+                              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500">{% if drive %}{{ drive.description }}{% endif %}</textarea>
+                </div>
             </div>
 
-            <div>
-                <label for="end_date" class="block text-sm font-medium text-gray-700">End Date & Time</label>
-                <div class="relative mt-1 rounded-md shadow-sm">
-                    {{ form.end_date(class="block w-full pl-4 pr-10 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm") }}
-                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                        <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+            <!-- Schedule Information -->
+            <div class="space-y-4">
+                <h2 class="text-xl font-semibold text-gray-900 mb-4">Schedule Information</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="start_date" class="block text-sm font-medium text-gray-700 mb-2">Start Date & Time</label>
+                        <input type="datetime-local" name="start_date" id="start_date" required value="{% if drive %}{{ drive.start_date.strftime('%Y-%m-%dT%H:%M') }}{% endif %}"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500">
+                    </div>
+                    
+                    <div>
+                        <label for="end_date" class="block text-sm font-medium text-gray-700 mb-2">End Date & Time</label>
+                        <input type="datetime-local" name="end_date" id="end_date" required value="{% if drive %}{{ drive.end_date.strftime('%Y-%m-%dT%H:%M') }}{% endif %}"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500">
                     </div>
                 </div>
-                {% if form.end_date.errors %}
-                    <p class="mt-2 text-sm text-red-600">{{ form.end_date.errors|join(', ') }}</p>
-                {% endif %}
             </div>
 
-            <div class="flex justify-end pt-4">
-                {{ form.submit(class="inline-flex justify-center py-3 px-6 border border-transparent shadow-sm text-base font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-150 ease-in-out") }}
+            <!-- Capacity and Requirements -->
+            <div class="space-y-4">
+                <h2 class="text-xl font-semibold text-gray-900 mb-4">Capacity and Requirements</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="target_donors" class="block text-sm font-medium text-gray-700 mb-2">Target Number of Donors</label>
+                        <input type="number" name="target_donors" id="target_donors" min="1" required value="{% if drive %}{{ drive.target_donors }}{% endif %}"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Blood Types Needed</label>
+                        <div class="mt-1 grid grid-cols-2 gap-2">
+                            {% for blood_type in ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'] %}
+                            <div class="flex items-center">
+                                <input id="blood_type_{{ blood_type }}" name="blood_types" type="checkbox" value="{{ blood_type }}"
+                                       class="focus:ring-red-500 h-4 w-4 text-red-600 border-gray-300 rounded"
+                                       {% if drive and drive.blood_types_needed_list and blood_type in drive.blood_types_needed_list %}checked{% endif %}>
+                                <label for="blood_type_{{ blood_type }}" class="ml-2 block text-sm text-gray-900">
+                                    {{ blood_type }}
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Information -->
+            <div class="space-y-4">
+                <h2 class="text-xl font-semibold text-gray-900 mb-4">Additional Information</h2>
+                
+                <div>
+                    <label for="requirements" class="block text-sm font-medium text-gray-700 mb-2">Donor Requirements</label>
+                    <textarea name="requirements" id="requirements" rows="3"
+                              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500"
+                              placeholder="List any specific requirements for donors...">{% if drive %}{{ drive.requirements }}{% endif %}</textarea>
+                </div>
+
+                <div>
+                    <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">Additional Notes</label>
+                    <textarea name="notes" id="notes" rows="3"
+                              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500"
+                              placeholder="Any additional information...">{% if drive %}{{ drive.notes }}{% endif %}</textarea>
+                </div>
+            </div>
+
+            <div class="flex justify-end space-x-4">
+                <a href="{{ url_for('blood_bank.dashboard') }}" 
+                   class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
+                    Cancel
+                </a>
+                <button type="submit" 
+                        class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                    {% if is_edit %}Update Blood Drive{% else %}Schedule Blood Drive{% endif %}
+                </button>
             </div>
         </form>
     </div>
